@@ -42,3 +42,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
+
+#define TAPPING_TERM 200
+#define HOLD_ON_OTHER_KEY_PRESS
+// #define PERMISIVE_HOLD
+
+#define QUICK_TAP_TERM 0
