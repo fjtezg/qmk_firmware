@@ -18,6 +18,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+// タップダンスの宣言
+enum {
+    TD_LGUI_RALT,
+    TD_RALT_LGUI
+};
+
+// タップダンスの定義
+tap_dance_action_t tap_dance_actions[] = {
+    // 1回タップすると Win/Cmd キー、2回タップすると Alt/Option キー。
+    [TD_LGUI_RALT]  = ACTION_TAP_DANCE_DOUBLE(KC_LGUI, KC_RALT),
+    // 1回タップすると Alt/Option キー、2回タップすると Win/Cmd キー。
+    [TD_RALT_LGUI]  = ACTION_TAP_DANCE_DOUBLE(KC_RALT, KC_LGUI),
+};
+
+
+// TAPPING_TERM_PER_KEY設定
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case TD(TD_LGUI_RALT):
+            return TAPPING_TERM_LONG;
+        case TD(TD_RALT_LGUI):
+            return TAPPING_TERM_LONG;
+        default:
+            return TAPPING_TERM;
+    }
+}
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
@@ -27,7 +54,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  MT(MOD_LSFT,KC_INT1),
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                         KC_LGUI,   LT(1,KC_LNG2),  MT(MOD_LALT,KC_SPC),              MT(MOD_LGUI,KC_ENT),   LT(2,KC_LNG1), KC_RALT
+        TD(TD_LGUI_RALT),   LT(1,KC_LNG2),  LT(2,KC_SPC),                       LT(1,KC_ENT),   LT(2,KC_LNG1), TD(TD_RALT_LGUI)
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -40,19 +67,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                                KC_NO,   KC_NO,   KC_RBRC, KC_BSLS, KC_NO, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                        KC_LGUI,    KC_TRNS,  MT(MOD_LALT,KC_SPC),     MT(MOD_LGUI,KC_ENT),   KC_TRNS, KC_RALT
+        TD(TD_LGUI_RALT),    KC_TRNS,  KC_SPC,                                  KC_ENT,   KC_TRNS, TD(TD_RALT_LGUI)
                                       //`--------------------------'  `--------------------------'
   ),
 
     [2] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_LNG1, KC_F6,   KC_F7, KC_F8,  KC_F9, KC_F10,                      KC_PGDN, KC_PGUP, KC_BSPC, KC_DEL, KC_PSCR, KC_INS,
+       KC_LNG1, KC_F6,   KC_F7, KC_F8,  KC_F9, KC_F10,                            KC_PGDN, KC_PGUP, KC_BSPC, KC_DEL, KC_PSCR, KC_INS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,                      KC_LEFT,  KC_DOWN, KC_UP, KC_RGHT, KC_APP,  KC_NO,
+      KC_LCTL, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,                                KC_LEFT,  KC_DOWN, KC_UP, KC_RGHT, KC_APP,  KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT, KC_F11, KC_F12, KC_F13, KC_F14, KC_F15,                      KC_VOLD, KC_VOLU, KC_HOME, KC_END, KC_MUTE, KC_RSFT,
+      KC_LSFT, KC_F11, KC_F12, KC_F13, KC_F14, KC_F15,                           KC_VOLD, KC_VOLU, KC_HOME, KC_END, KC_MUTE, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                         KC_LGUI,   KC_TRNS,  MT(MOD_LALT,KC_SPC),     MT(MOD_LGUI,KC_ENT), KC_TRNS, KC_RALT
+        TD(TD_LGUI_RALT),   KC_TRNS,  KC_SPC,                                    KC_ENT, KC_TRNS, TD(TD_RALT_LGUI)
                                       //`--------------------------'  `--------------------------'
   ),
 
