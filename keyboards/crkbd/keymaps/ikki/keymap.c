@@ -34,9 +34,7 @@ typedef struct {
 
 // タップダンスの宣言
 enum {
-    TD_LGUI_RALT,
-    TD_RALT_LGUI,
-    TD_LSFT_LAYER3
+    TD_LGUI_LAYER2
 };
 
 
@@ -51,52 +49,48 @@ td_state_t cur_dance(tap_dance_state_t *state) {
 }
 
 // この例のタップダンスキーに関連付けられた "tap" 構造体を初期化します
-static td_tap_t lsft_layer3_tap_state = {
+static td_tap_t lgui_layer2_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
 
 
 // タップダンスキーの動作をコントロールする関数
-void lsft_layer3_finished(tap_dance_state_t *state, void *user_data) {
-    lsft_layer3_tap_state.state = cur_dance(state);
-    switch (lsft_layer3_tap_state.state) {
+void lgui_layer2_finished(tap_dance_state_t *state, void *user_data) {
+    lgui_layer2_tap_state.state = cur_dance(state);
+    switch (lgui_layer2_tap_state.state) {
         case TD_SINGLE_TAP:
-            tap_code(KC_LSFT);
+            tap_code(KC_LGUI);
             break;
         case TD_SINGLE_HOLD:
-            register_code(KC_LSFT);
+            register_code(KC_LGUI);
             break;
         case TD_DOUBLE_HOLD:
-            layer_on(3);
+            layer_on(2);
             break;
         default: break;
     }
 }
 
-void lsft_layer3_reset(tap_dance_state_t *state, void *user_data) {
+void lgui_layer2_reset(tap_dance_state_t *state, void *user_data) {
     // キーを押し続けていて今離したら、レイヤーをオフに切り替えます。
-    switch (lsft_layer3_tap_state.state) {
+    switch (lgui_layer2_tap_state.state) {
         case TD_SINGLE_HOLD:
-            unregister_code(KC_LSFT);
+            unregister_code(KC_LGUI);
             break;
         case TD_DOUBLE_HOLD:
-            layer_off(3);
+            layer_off(2);
             break;
         default: break;
 
     }
-    lsft_layer3_tap_state.state = TD_NONE;
+    lgui_layer2_tap_state.state = TD_NONE;
 }
 
 // タップダンスの定義
 tap_dance_action_t tap_dance_actions[] = {
-    // 1回タップすると Win/Cmd キー、2回タップすると Alt/Option キー。
-    [TD_LGUI_RALT]  = ACTION_TAP_DANCE_DOUBLE(KC_LGUI, KC_RALT),
-    // 1回タップすると Alt/Option キー、2回タップすると Win/Cmd キー。
-    [TD_RALT_LGUI]  = ACTION_TAP_DANCE_DOUBLE(KC_RALT, KC_LGUI),
-    // 1回タップすると Shift キー、2回タップすると Layer3 キー。
-    [TD_LSFT_LAYER3] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lsft_layer3_finished, lsft_layer3_reset)
+    // 1回タップすると Win/Cmd キー、2回タップすると Layer2 キー。
+    [TD_LGUI_LAYER2] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lgui_layer2_finished, lgui_layer2_reset)
 };
 
 
@@ -116,9 +110,7 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 // TAPPING_TERM_PER_KEY設定
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case TD(TD_LGUI_RALT):
-        case TD(TD_RALT_LGUI):
-        case TD(TD_LSFT_LAYER3):
+        case TD(TD_LGUI_LAYER2):
             return TAPPING_TERM_LONG;
         default:
             return TAPPING_TERM;
@@ -132,9 +124,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       MT(MOD_LCTL,KC_TAB),    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_QUOT,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      TD(TD_LSFT_LAYER3),    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,              KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  MT(MOD_LSFT,KC_INT1),
+      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,              KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  MT(MOD_LSFT,KC_INT1),
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_RALT),   LT(1,KC_LNG2),  LT(2,KC_SPC),                       LT(1,KC_ENT),   LT(2,KC_LNG1), TD(TD_RALT_LGUI)
+        TD(TD_LGUI_LAYER2),   LT(1,KC_LNG2),  MT(MOD_LALT,KC_SPC),                       MT(MOD_LALT,KC_ENT),   LT(2,KC_LNG1), MO(1)
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -147,7 +139,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                XXXXXXX,   XXXXXXX,   KC_RBRC, KC_BSLS, XXXXXXX, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_RALT),    KC_TRNS,  KC_SPC,                                  KC_ENT,   KC_TRNS, TD(TD_RALT_LGUI)
+        KC_LGUI,    KC_TRNS,  MT(MOD_LALT,KC_SPC),                                  MT(MOD_LALT,KC_ENT),   KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -159,7 +151,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, KC_F11, KC_F12, KC_F13, KC_F14, KC_F15,                           KC_VOLD, KC_VOLU, KC_HOME, KC_END, KC_MUTE, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_RALT),   KC_TRNS,  KC_SPC,                                    KC_ENT, KC_TRNS, TD(TD_RALT_LGUI)
+        KC_LGUI,   KC_TRNS,  MT(MOD_LALT,KC_SPC),                                    MT(MOD_LALT,KC_ENT), KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -171,7 +163,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,                        XXXXXXX,   XXXXXXX,   S(KC_RBRC), S(KC_BSLS), XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_RALT),    KC_TRNS,  KC_SPC,                                  KC_ENT,   KC_TRNS, TD(TD_RALT_LGUI)
+        KC_LGUI,   KC_TRNS,  MT(MOD_LALT,KC_SPC),                                    MT(MOD_LALT,KC_ENT), KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   )
 };
