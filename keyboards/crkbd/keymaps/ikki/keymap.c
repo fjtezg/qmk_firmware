@@ -110,8 +110,11 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 // TAPPING_TERM_PER_KEY設定
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+        case MT(MOD_LALT,KC_SPC):
+        case MT(MOD_LALT,KC_ENT):
+            return -1;  //ALTはRETRO_TAPが効かないので、TAPPING_TERMを無制限にしてHOLD_ON_OTHER_KEY_PRESSでALTを使用する
         case TD(TD_LGUI_LAYER2):
-            return TAPPING_TERM_LONG;
+            return TAPPING_TERM_LONG;   //タップダンスはTAPPING_TERMを長めに取る
         default:
             return TAPPING_TERM;
     }
