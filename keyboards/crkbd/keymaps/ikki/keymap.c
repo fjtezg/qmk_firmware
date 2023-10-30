@@ -94,31 +94,49 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 
-//HOLD_ON_OTHER_KEY_PRESS_PER_KEY設定
-bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case LT(1,KC_LNG2):
-        case LT(2,KC_LNG1):
-            // Do not select the hold action when another key is pressed.
-            return false;
-        default:
-            // Immediately select the hold action when another key is pressed.
-            return true;
-    }
-}
+// //HOLD_ON_OTHER_KEY_PRESS_PER_KEY設定
+// bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+//     switch (keycode) {
+//         case LT(1,KC_LNG2):
+//         case LT(2,KC_LNG1):
+//             // Do not select the hold action when another key is pressed.
+//             return false;
+//         default:
+//             // Immediately select the hold action when another key is pressed.
+//             return true;
+//     }
+// }
 
 // TAPPING_TERM_PER_KEY設定
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case MT(MOD_LALT,KC_SPC):
-        case MT(MOD_LALT,KC_ENT):
-            return -1;  //ALTはRETRO_TAPが効かないので、TAPPING_TERMを無制限にしてHOLD_ON_OTHER_KEY_PRESSでALTを使用する
+        // case MT(MOD_LALT,KC_SPC):
+        // case MT(MOD_LALT,KC_ENT):
+        //     return -1;  //ALTはRETRO_TAPが効かないので、TAPPING_TERMを無制限にしてHOLD_ON_OTHER_KEY_PRESSでALTを使用する
         case TD(TD_LGUI_LAYER2):
             return TAPPING_TERM_LONG;   //タップダンスはTAPPING_TERMを長めに取る
         default:
             return TAPPING_TERM;
     }
 }
+
+enum combos {
+  JK_LNG1,
+  DF_LNG2,
+  PMINS_BS
+};
+
+const uint16_t PROGMEM jk_combo[] = {KC_J, KC_K, COMBO_END};
+const uint16_t PROGMEM df_combo[] = {KC_D, KC_F, COMBO_END};
+const uint16_t PROGMEM pmins_combo[] = {KC_P, KC_MINS, COMBO_END};
+
+
+combo_t key_combos[] = {
+  [JK_LNG1] = COMBO(jk_combo, KC_LNG1),
+  [DF_LNG2] = COMBO(df_combo, KC_LNG2),
+  [PMINS_BS] = COMBO(pmins_combo, KC_BSPC)
+};
+
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_split_3x6_3(
@@ -129,7 +147,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,              KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  MT(MOD_LSFT,KC_INT1),
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_LAYER2),   LT(1,KC_LNG2),  MT(MOD_LALT,KC_SPC),                       MT(MOD_LALT,KC_ENT),   LT(2,KC_LNG1), MO(1)
+        TD(TD_LGUI_LAYER2),   MO(1),  MT(MOD_LALT,KC_SPC),                       MT(MOD_LALT,KC_ENT),   MO(2), MO(1)
                                       //`--------------------------'  `--------------------------'
 
   ),
