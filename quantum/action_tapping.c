@@ -22,6 +22,7 @@
 #    endif
 #    define WITHIN_TAPPING_TERM(e) (TIMER_DIFF_16(e.time, tapping_key.event.time) < GET_TAPPING_TERM(get_record_keycode(&tapping_key, false), &tapping_key))
 #    define WITHIN_QUICK_TAP_TERM(e) (TIMER_DIFF_16(e.time, tapping_key.event.time) < GET_QUICK_TAP_TERM(get_record_keycode(&tapping_key, false), &tapping_key))
+#    define WITHIN_HOLD_ON_OTHER_KEY_HOLD_TERM(e) (TIMER_DIFF_16(e.time, tapping_key.tap.interrupted_time) < GET_HOLD_ON_OTHER_KEY_HOLD_TERM(get_record_keycode(&tapping_key, false), &tapping_key))
 
 #    ifdef DYNAMIC_TAPPING_TERM_ENABLE
 uint16_t g_tapping_term = TAPPING_TERM;
@@ -156,6 +157,14 @@ void action_tapping_process(keyrecord_t record) {
 #        define TAP_GET_HOLD_ON_OTHER_KEY_PRESS false
 #    endif
 
+#    ifdef HOLD_ON_OTHER_KEY_HOLD_PER_KEY
+#        define TAP_GET_HOLD_ON_OTHER_KEY_HOLD get_hold_on_other_key_hold(tapping_keycode, &tapping_key)
+#    elif defined(HOLD_ON_OTHER_KEY_HOLD_TERM)
+#        define TAP_GET_HOLD_ON_OTHER_KEY_HOLD true
+#    else
+#        define TAP_GET_HOLD_ON_OTHER_KEY_HOLD false
+#    endif
+
 /** \brief Tapping
  *
  * Rule: Tap key is typed(pressed and released) within TAPPING_TERM.
@@ -201,6 +210,15 @@ bool process_tapping(keyrecord_t *keyp) {
 #    if defined(AUTO_SHIFT_ENABLE) && defined(RETRO_SHIFT)
                     retroshift_swap_times();
 #    endif
+                    if(tapping_key.tap.interrupted == true && TAP_GET_HOLD_ON_OTHER_KEY_HOLD && WITHIN_HOLD_ON_OTHER_KEY_HOLD_TERM(event)){
+                        ac_dprintf("Tapping: End. No tap. Interfered by other key hold\n");
+                        process_record(&tapping_key);
+                        tapping_key = (keyrecord_t){0};
+                        debug_tapping_key();
+                        // enqueue
+                        return false;
+                    }
+
                     // first tap!
                     ac_dprintf("Tapping: First tap(0->1).\n");
                     tapping_key.tap.count = 1;
@@ -221,6 +239,11 @@ bool process_tapping(keyrecord_t *keyp) {
                     (
                         !event.pressed && waiting_buffer_typed(event) &&
                         TAP_GET_PERMISSIVE_HOLD
+                    )
+                    ||
+                    (
+                        !event.pressed && waiting_buffer_typed(event) &&
+                        tapping_key.tap.interrupted == true && TAP_GET_HOLD_ON_OTHER_KEY_HOLD && WITHIN_HOLD_ON_OTHER_KEY_HOLD_TERM(event)
                     )
                     // Causes nested taps to not wait past TAPPING_TERM/RETRO_SHIFT
                     // unnecessarily and fixes them for Layer Taps.
@@ -287,6 +310,7 @@ bool process_tapping(keyrecord_t *keyp) {
                     // set interrupted flag when other key preesed during tapping
                     if (event.pressed) {
                         tapping_key.tap.interrupted = true;
+                        tapping_key.tap.interrupted_time = event.time;
                         if (TAP_GET_HOLD_ON_OTHER_KEY_PRESS) {
                             ac_dprintf("Tapping: End. No tap. Interfered by pressed key\n");
                             process_record(&tapping_key);

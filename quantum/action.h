@@ -42,6 +42,7 @@ typedef struct {
     bool    reserved1 : 1;
     bool    reserved0 : 1;
     uint8_t count : 4;
+    uint16_t interrupted_time;
 } tap_t;
 
 /* Key event container for recording */

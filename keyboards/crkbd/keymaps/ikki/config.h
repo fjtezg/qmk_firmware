@@ -29,11 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define EE_HANDS
 
 #define QUICK_TAP_TERM 0
-#define TAPPING_TERM 115
+#define TAPPING_TERM 300
 #define RETRO_TAPPING
 
-#define HOLD_ON_OTHER_KEY_PRESS
-#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+#define HOLD_ON_OTHER_KEY_HOLD_TERM 50
+
+// #define HOLD_ON_OTHER_KEY_PRESS
+// #define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
 #define TAPPING_TERM_LONG 200
 #define TAPPING_TERM_PER_KEY

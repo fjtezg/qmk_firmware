@@ -32,6 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    define TAPPING_TOGGLE 5
 #endif
 
+/* period of permissive hold(ms) */
+#ifndef HOLD_ON_OTHER_KEY_HOLD_TERM
+#    define HOLD_ON_OTHER_KEY_HOLD_TERM 70
+#endif
+
 #define WAITING_BUFFER_SIZE 8
 
 #ifndef NO_ACTION_TAPPING
@@ -45,6 +50,8 @@ uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record);
 bool     get_permissive_hold(uint16_t keycode, keyrecord_t *record);
 bool     get_retro_tapping(uint16_t keycode, keyrecord_t *record);
 bool     get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record);
+bool     get_hold_on_other_key_hold_term(uint16_t keycode, keyrecord_t *record);
+
 
 #ifdef DYNAMIC_TAPPING_TERM_ENABLE
 extern uint16_t g_tapping_term;
@@ -62,4 +69,10 @@ extern uint16_t g_tapping_term;
 #    define GET_QUICK_TAP_TERM(keycode, record) get_quick_tap_term(keycode, record)
 #else
 #    define GET_QUICK_TAP_TERM(keycode, record) (QUICK_TAP_TERM)
+#endif
+
+#ifdef HOLD_ON_OTHER_KEY_HOLD_TERM_PER_KEY
+#    define GET_HOLD_ON_OTHER_KEY_HOLD_TERM(keycode, record) get_hold_on_other_key_hold_term(keycode, record)
+#else
+#    define GET_HOLD_ON_OTHER_KEY_HOLD_TERM(keycode, record) (HOLD_ON_OTHER_KEY_HOLD_TERM)
 #endif
