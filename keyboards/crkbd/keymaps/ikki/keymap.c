@@ -24,6 +24,7 @@ typedef enum {
     TD_UNKNOWN,
     TD_SINGLE_TAP,
     TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
     TD_DOUBLE_HOLD
 } td_state_t;
 
@@ -34,7 +35,7 @@ typedef struct {
 
 // タップダンスの宣言
 enum {
-    TD_LGUI_LAYER2
+    TD_LGUI_LALT
 };
 
 
@@ -44,53 +45,59 @@ td_state_t cur_dance(tap_dance_state_t *state) {
     if (state->count == 1) {
         if (!state->pressed) return TD_SINGLE_TAP;
         else return TD_SINGLE_HOLD;
-    } else if (state->count == 2) return TD_DOUBLE_HOLD;
+    } else if (state->count == 2) {
+        if (!state->pressed) return TD_DOUBLE_TAP;
+        else return TD_DOUBLE_HOLD;
+    }
     else return TD_UNKNOWN;
 }
 
 // この例のタップダンスキーに関連付けられた "tap" 構造体を初期化します
-static td_tap_t lgui_layer2_tap_state = {
+static td_tap_t lgui_lalt_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
 
 
 // タップダンスキーの動作をコントロールする関数
-void lgui_layer2_finished(tap_dance_state_t *state, void *user_data) {
-    lgui_layer2_tap_state.state = cur_dance(state);
-    switch (lgui_layer2_tap_state.state) {
+void lgui_lalt_finished(tap_dance_state_t *state, void *user_data) {
+    lgui_lalt_tap_state.state = cur_dance(state);
+    switch (lgui_lalt_tap_state.state) {
         case TD_SINGLE_TAP:
-            tap_code(KC_LGUI);
+            tap_code(KC_LALT);
             break;
         case TD_SINGLE_HOLD:
-            register_code(KC_LGUI);
+            register_code(KC_LALT);
+            break;
+        case TD_DOUBLE_TAP:
+            tap_code(KC_LGUI);
             break;
         case TD_DOUBLE_HOLD:
-            layer_on(2);
+            register_code(KC_LGUI);
             break;
         default: break;
     }
 }
 
-void lgui_layer2_reset(tap_dance_state_t *state, void *user_data) {
+void lgui_lalt_reset(tap_dance_state_t *state, void *user_data) {
     // キーを押し続けていて今離したら、レイヤーをオフに切り替えます。
-    switch (lgui_layer2_tap_state.state) {
+    switch (lgui_lalt_tap_state.state) {
         case TD_SINGLE_HOLD:
-            unregister_code(KC_LGUI);
+            unregister_code(KC_LALT);
             break;
         case TD_DOUBLE_HOLD:
-            layer_off(2);
+            unregister_code(KC_LGUI);
             break;
         default: break;
 
     }
-    lgui_layer2_tap_state.state = TD_NONE;
+    lgui_lalt_tap_state.state = TD_NONE;
 }
 
 // タップダンスの定義
 tap_dance_action_t tap_dance_actions[] = {
-    // 1回タップすると Win/Cmd キー、2回タップすると Layer2 キー。
-    [TD_LGUI_LAYER2] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lgui_layer2_finished, lgui_layer2_reset)
+    // 1回タップすると ALTキー、2回タップすると Win/Cmd キー。
+    [TD_LGUI_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lgui_lalt_finished, lgui_lalt_reset)
 };
 
 
@@ -113,7 +120,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // case MT(MOD_LALT,KC_SPC):
         // case MT(MOD_LALT,KC_ENT):
         //     return -1;  //ALTはRETRO_TAPが効かないので、TAPPING_TERMを無制限にしてHOLD_ON_OTHER_KEY_PRESSでALTを使用する
-        case TD(TD_LGUI_LAYER2):
+        case TD(TD_LGUI_LALT):
             return TAPPING_TERM_LONG;   //タップダンスはTAPPING_TERMを長めに取る
         default:
             return TAPPING_TERM;
@@ -123,18 +130,32 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 enum combos {
   JK_LNG1,
   DF_LNG2,
-  PMINS_BS
+  PMINS_BS,
+  QW_F2,
+  RT_F5,
+  MINSQUOT_DEL,
+  CMB_ENT
 };
 
 const uint16_t PROGMEM jk_combo[] = {KC_J, KC_K, COMBO_END};
 const uint16_t PROGMEM df_combo[] = {KC_D, KC_F, COMBO_END};
 const uint16_t PROGMEM pmins_combo[] = {KC_P, KC_MINS, COMBO_END};
+const uint16_t PROGMEM qw_combo[] = {KC_Q, KC_W, COMBO_END};
+const uint16_t PROGMEM rt_combo[] = {KC_R, KC_T, COMBO_END};
+const uint16_t PROGMEM minsquot_combo[] = {KC_MINS, KC_QUOT, COMBO_END};
+const uint16_t PROGMEM ent_combo[] = {KC_SLSH, MT(MOD_LSFT,KC_INT1), COMBO_END};
+
+
 
 
 combo_t key_combos[] = {
   [JK_LNG1] = COMBO(jk_combo, KC_LNG1),
   [DF_LNG2] = COMBO(df_combo, KC_LNG2),
-  [PMINS_BS] = COMBO(pmins_combo, KC_BSPC)
+  [PMINS_BS] = COMBO(pmins_combo, KC_BSPC),
+  [QW_F2] = COMBO(qw_combo, KC_F2),
+  [RT_F5] = COMBO(rt_combo, KC_F5),
+  [MINSQUOT_DEL] = COMBO(minsquot_combo, KC_DEL),
+  [CMB_ENT] = COMBO(ent_combo, KC_ENT)
 };
 
 
@@ -147,7 +168,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,              KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  MT(MOD_LSFT,KC_INT1),
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        TD(TD_LGUI_LAYER2),   MO(1),  MT(MOD_LALT,KC_SPC),                       MT(MOD_LALT,KC_ENT),   MO(2), MO(1)
+        TD(TD_LGUI_LALT),   MO(1),  KC_SPC,                                     KC_ENT,   MO(2), MO(1)
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -160,7 +181,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                XXXXXXX,   XXXXXXX,   KC_RBRC, KC_BSLS, XXXXXXX, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        KC_LGUI,    KC_TRNS,  MT(MOD_LALT,KC_SPC),                                  MT(MOD_LALT,KC_ENT),   KC_TRNS, KC_TRNS
+        KC_LGUI,    KC_TRNS,  KC_SPC,                                             KC_ENT,   KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -172,7 +193,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, KC_F11, KC_F12, KC_F13, KC_F14, KC_F15,                           KC_VOLD, KC_VOLU, KC_HOME, KC_END, KC_MUTE, KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        KC_LGUI,   KC_TRNS,  MT(MOD_LALT,KC_SPC),                                    MT(MOD_LALT,KC_ENT), KC_TRNS, KC_TRNS
+        KC_LGUI,   KC_TRNS,  KC_SPC,                                    KC_ENT, KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -184,7 +205,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,                        XXXXXXX,   XXXXXXX,   S(KC_RBRC), S(KC_BSLS), XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        KC_LGUI,   KC_TRNS,  MT(MOD_LALT,KC_SPC),                                    MT(MOD_LALT,KC_ENT), KC_TRNS, KC_TRNS
+        KC_LGUI,   KC_TRNS,  KC_SPC,                                    KC_ENT, KC_TRNS, KC_TRNS
                                       //`--------------------------'  `--------------------------'
   )
 };
